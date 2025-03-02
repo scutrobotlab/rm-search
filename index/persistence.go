@@ -414,3 +414,68 @@ func extractAndUnescapeFileName(urlStr string) (string, error) {
 	}
 	return unescapedFilename, nil
 }
+
+// PersistenceBbsPostItemRange 持久化帖子列表
+func (i *Indexer) PersistenceBbsPostItemRange(ctx context.Context, startOffset, endOffset int64) error {
+	const PageSize = 1000
+	for offset := startOffset; offset < endOffset; offset += PageSize {
+		err := i.PersistenceBbsPostItemPage(ctx, offset, PageSize)
+		if err != nil {
+			return errors.Wrap(err, "persistence bbs post item page failed")
+		}
+		logrus.Infof("persistence bbs post item %d/%d", offset, endOffset)
+	}
+	return nil
+}
+
+// PersistenceBbsPostItemPage 持久化帖子列表
+func (i *Indexer) PersistenceBbsPostItemPage(ctx context.Context, page, size int64) error {
+	p := i.SvcCtx.Query.BbsPostItem
+
+	posts, err := ListBbsPost(page, size)
+	if err != nil {
+		return errors.Wrap(err, "list bbs post failed")
+	}
+	if posts.Data == nil {
+		return nil
+	}
+
+	var items []*model.BbsPostItem
+	for _, post := range posts.Data.List {
+		tags, _ := json.Marshal(post.Tags)
+		solution, _ := json.Marshal(post.Solution)
+		item := model.BbsPostItem{
+			ID:             int64(post.Id),
+			History:        post.History,
+			Official:       post.Official,
+			Top:            post.Top,
+			Marrow:         post.Marrow,
+			HeadImg:        post.HeadImg,
+			Category:       post.Category,
+			CategoryDesc:   post.CategoryDesc,
+			Title:          post.Title,
+			Introduction:   post.Introduction,
+			AuthorID:       int64(post.AuthorId),
+			AuthorNickname: post.AuthorNickname,
+			AuthorAvatar:   post.AuthorAvatar,
+			CreateAt:       post.CreateAt,
+			Views:          int64(post.Views),
+			Approvals:      int64(post.Approvals),
+			Comments:       int64(post.Comments),
+			Tags:           string(tags),
+			Solution:       string(solution),
+			SolutionDesc:   post.SolutionDesc,
+			State:          post.State,
+			StateDesc:      post.StateDesc,
+			UpdateAt:       post.UpdateAt,
+			WikiID:         int64(post.WikiId),
+		}
+		items = append(items, &item)
+	}
+	err = p.WithContext(ctx).Save(items...)
+	if err != nil {
+		return errors.Wrap(err, "save bbs post item failed")
+	}
+
+	return nil
+}

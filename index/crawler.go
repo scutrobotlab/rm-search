@@ -233,3 +233,35 @@ func GetAttachment(url string) (ret *Attachment, err error) {
 		Data:         data,
 	}, nil
 }
+
+func ListBbsPost(page, size int64) (ret *ListBbsPostResp, err error) {
+	url := "https://bbs.robomaster.com/developers-server/rest/posts/list"
+	reqData := map[string]interface{}{
+		"pageSize": size,
+		"pageNo":   page,
+		"filter": map[string]interface{}{
+			"category": "WIKI",
+		},
+	}
+	reqBody, _ := json.Marshal(reqData)
+
+	resp, err := http.Post(url, "application/json", bytes.NewReader(reqBody))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		if resp.StatusCode == 405 {
+			return nil, ErrStatusMethodNotAllowed
+		}
+		return nil, fmt.Errorf("status code: %d", resp.StatusCode)
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&ret)
+	if err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}

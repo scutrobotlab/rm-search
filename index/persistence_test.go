@@ -20,7 +20,7 @@ func TestIndexer_BatchPersistenceRangeIfExist(t *testing.T) {
 	ctx := context.Background()
 	svcCtx := svc.NewContextForTest(svc.WithDb())
 	idx := NewIndexer(svcCtx)
-	err := idx.BatchPersistenceRangeIfExist(ctx, 0, 10_0000, 100)
+	err := idx.BatchPersistenceRangeIfExist(ctx, 20_0000, 50_0000, 100)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,6 +72,26 @@ func TestIndexer_BatchPersistenceAttachmentFromAnnounce(t *testing.T) {
 	svcCtx := svc.NewContextForTest(svc.WithDb(), svc.WithTika())
 	idx := NewIndexer(svcCtx)
 	err := idx.BatchPersistenceAttachmentFromAnnounce(ctx, 800, 2000, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestIndexer_PersistenceBbsPostItemRange(t *testing.T) {
+	ctx := context.Background()
+	svcCtx := svc.NewContextForTest(svc.WithDb())
+	idx := NewIndexer(svcCtx)
+	err := idx.PersistenceBbsPostItemRange(ctx, 1, 40000)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestIndexer_PersistenceBbsPostItemPage(t *testing.T) {
+	ctx := context.Background()
+	svcCtx := svc.NewContextForTest(svc.WithDb())
+	idx := NewIndexer(svcCtx)
+	err := idx.PersistenceBbsPostItemPage(ctx, 1, 100)
 	if err != nil {
 		t.Fatal(err)
 	}

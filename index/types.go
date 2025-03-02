@@ -131,3 +131,38 @@ type Attachment struct {
 	LastModified time.Time `json:"lastModified,omitempty"`
 	Data         []byte    `json:"data,omitempty"`
 }
+
+type ListBbsPostResp RestResp[ListBbsPostData]
+
+type ListBbsPostData struct {
+	List  []BbsPostItem `json:"list"`
+	Total int64         `json:"total"`
+	Size  int64         `json:"size"`
+}
+
+type BbsPostItem struct {
+	History        bool          `json:"history"`
+	Official       bool          `json:"official"`
+	Top            bool          `json:"top"`
+	Marrow         bool          `json:"marrow"`
+	HeadImg        string        `json:"headImg"`
+	Id             int           `json:"id"`
+	Category       string        `json:"category"`
+	CategoryDesc   string        `json:"categoryDesc"`
+	Title          string        `json:"title"`
+	Introduction   string        `json:"introduction"`
+	AuthorId       int           `json:"authorId"`
+	AuthorNickname string        `json:"authorNickname"`
+	AuthorAvatar   string        `json:"authorAvatar"`
+	CreateAt       time.Time     `json:"createAt"`
+	Views          int           `json:"views"`
+	Approvals      int           `json:"approvals"`
+	Comments       int           `json:"comments"`
+	Tags           []interface{} `json:"tags"`
+	Solution       interface{}   `json:"solution"`
+	SolutionDesc   string        `json:"solutionDesc"`
+	State          string        `json:"state"`
+	StateDesc      string        `json:"stateDesc"`
+	UpdateAt       time.Time     `json:"updateAt"`
+	WikiId         int           `json:"wikiId"`
+}

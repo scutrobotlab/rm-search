@@ -1,6 +1,7 @@
 package index
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -42,4 +43,17 @@ func TestGetAttachment(t *testing.T) {
 		t.Fatalf("GetAttachment error: %v", err)
 	}
 	t.Logf("Attachment: %+v", attachment)
+}
+
+func TestListBbsPost(t *testing.T) {
+	posts, err := ListBbsPost(1, 10)
+	if err != nil {
+		t.Fatalf("ListBbsPost error: %v", err)
+	}
+	t.Logf("Posts: %+v", posts)
+	if posts.Data != nil {
+		for _, item := range posts.Data.List {
+			fmt.Printf("%+v\n", item)
+		}
+	}
 }

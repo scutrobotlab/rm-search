@@ -16,10 +16,11 @@ import (
 )
 
 var (
-	Q          = new(Query)
-	Announce   *announce
-	Attachment *attachment
-	BbsPost    *bbsPost
+	Q           = new(Query)
+	Announce    *announce
+	Attachment  *attachment
+	BbsPost     *bbsPost
+	BbsPostItem *bbsPostItem
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -27,33 +28,37 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Announce = &Q.Announce
 	Attachment = &Q.Attachment
 	BbsPost = &Q.BbsPost
+	BbsPostItem = &Q.BbsPostItem
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:         db,
-		Announce:   newAnnounce(db, opts...),
-		Attachment: newAttachment(db, opts...),
-		BbsPost:    newBbsPost(db, opts...),
+		db:          db,
+		Announce:    newAnnounce(db, opts...),
+		Attachment:  newAttachment(db, opts...),
+		BbsPost:     newBbsPost(db, opts...),
+		BbsPostItem: newBbsPostItem(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Announce   announce
-	Attachment attachment
-	BbsPost    bbsPost
+	Announce    announce
+	Attachment  attachment
+	BbsPost     bbsPost
+	BbsPostItem bbsPostItem
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Announce:   q.Announce.clone(db),
-		Attachment: q.Attachment.clone(db),
-		BbsPost:    q.BbsPost.clone(db),
+		db:          db,
+		Announce:    q.Announce.clone(db),
+		Attachment:  q.Attachment.clone(db),
+		BbsPost:     q.BbsPost.clone(db),
+		BbsPostItem: q.BbsPostItem.clone(db),
 	}
 }
 
@@ -67,24 +72,27 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Announce:   q.Announce.replaceDB(db),
-		Attachment: q.Attachment.replaceDB(db),
-		BbsPost:    q.BbsPost.replaceDB(db),
+		db:          db,
+		Announce:    q.Announce.replaceDB(db),
+		Attachment:  q.Attachment.replaceDB(db),
+		BbsPost:     q.BbsPost.replaceDB(db),
+		BbsPostItem: q.BbsPostItem.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Announce   IAnnounceDo
-	Attachment IAttachmentDo
-	BbsPost    IBbsPostDo
+	Announce    IAnnounceDo
+	Attachment  IAttachmentDo
+	BbsPost     IBbsPostDo
+	BbsPostItem IBbsPostItemDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Announce:   q.Announce.WithContext(ctx),
-		Attachment: q.Attachment.WithContext(ctx),
-		BbsPost:    q.BbsPost.WithContext(ctx),
+		Announce:    q.Announce.WithContext(ctx),
+		Attachment:  q.Attachment.WithContext(ctx),
+		BbsPost:     q.BbsPost.WithContext(ctx),
+		BbsPostItem: q.BbsPostItem.WithContext(ctx),
 	}
 }
 
