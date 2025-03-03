@@ -2,7 +2,12 @@ package index
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/scutrobotlab/rm-search/svc"
+	"io"
+	"net/http"
+	"os"
 	"testing"
 )
 
@@ -99,4 +104,52 @@ func TestIndexer_ScrollAndIndexAttachment(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("index %d attachments", count)
+}
+
+func TestIndexer_ScrollBbsPost(t *testing.T) {
+	ctx := context.Background()
+	svcCtx := svc.NewContextForTest(svc.WithDb(), svc.WithElastic())
+	idx := NewIndexer(svcCtx)
+
+	p := idx.SvcCtx.Query.BbsPostItem
+	items, err := p.WithContext(ctx).
+		Where(p.HeadImg.Neq("[]")).
+		Where(p.HeadImg.Neq("null")).
+		Find()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("items.length: %d", len(items))
+
+	_ = os.Mkdir("images", 0755)
+
+	for _, item := range items {
+		var headImages []map[string]interface{}
+		if err := json.Unmarshal([]byte(item.HeadImg), &headImages); err != nil {
+			t.Fatal(err)
+		}
+		if len(headImages) == 0 {
+			t.Errorf("item.ID: %d, item.HeadImg: %s", item.ID, item.HeadImg)
+		}
+		for _, headImage := range headImages {
+			resp, err := http.Get(headImage["url"].(string))
+			if err != nil {
+				t.Errorf(err.Error())
+				continue
+			}
+
+			data, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Errorf(err.Error())
+				continue
+			}
+			resp.Body.Close()
+
+			err = os.WriteFile(fmt.Sprintf("images/%d_%s_%s", item.ID, item.Title, headImage["alt"].(string)), data, 0644)
+			if err != nil {
+				t.Errorf(err.Error())
+				continue
+			}
+		}
+	}
 }

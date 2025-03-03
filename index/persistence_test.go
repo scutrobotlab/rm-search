@@ -40,7 +40,7 @@ func TestIndexer_PersistenceAnnounce(t *testing.T) {
 	ctx := context.Background()
 	svcCtx := svc.NewContextForTest(svc.WithDb())
 	idx := NewIndexer(svcCtx)
-	err := idx.PersistenceAnnounce(ctx, 1784)
+	err := idx.PersistenceAnnounce(ctx, 1768)
 	if err != nil {
 		t.Fatal(err)
 	}
